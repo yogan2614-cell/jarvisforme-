@@ -9,19 +9,22 @@ from sqlalchemy.orm import Session, sessionmaker
 
 load_dotenv()
 
-DATABASE_URL = os.getenv("DATABASE_URL")
+DATABASE_URL = os.getenv("DATABASE_URL", "").strip()
 
-if not DATABASE_URL:
-    raise RuntimeError(
-        "DATABASE_URL is not configured. Copy .env.example to .env and set it."
-    )
-
-engine = create_engine(DATABASE_URL, pool_pre_ping=True)
-SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
+# Keep the assistant usable before PostgreSQL is configured locally.
+engine = create_engine(DATABASE_URL, pool_pre_ping=True) if DATABASE_URL else None
+SessionLocal = (
+    sessionmaker(bind=engine, autoflush=False, autocommit=False)
+    if engine is not None
+    else None
+)
 
 
 def get_session() -> Generator[Session, None, None]:
     """Yield a database session and close it safely."""
+    if SessionLocal is None:
+        raise RuntimeError("DATABASE_URL is not configured.")
+
     session = SessionLocal()
     try:
         yield session
