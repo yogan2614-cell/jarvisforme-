@@ -7,6 +7,7 @@ A modular personal AI assistant foundation.
 - Gemini-powered text brain
 - Command router
 - Optional ElevenLabs text-to-speech
+- PostgreSQL persistence with SQLAlchemy
 - Secure `.env` configuration
 - Lightweight terminal interface
 
@@ -34,7 +35,23 @@ Create your local environment file:
 copy .env.example .env
 ```
 
-Then add your own `GEMINI_API_KEY`. ElevenLabs values are optional for Phase 1 voice output.
+Then configure your API keys and PostgreSQL connection in `.env`.
+
+### PostgreSQL
+
+Install PostgreSQL locally, create a database named `jarvis`, and set `DATABASE_URL` in `.env`:
+
+```text
+DATABASE_URL=postgresql+psycopg://jarvis:password@localhost:5432/jarvis
+```
+
+Initialize the tables:
+
+```bash
+python scripts/init_db.py
+```
+
+The current database layer stores conversation history and provides durable memory helpers. PostgreSQL is optional during initial setup; JARVIS can still run without `DATABASE_URL`.
 
 ## Run
 
@@ -61,6 +78,12 @@ JARVISFORME/
 ├── core/
 │   ├── brain.py
 │   └── router.py
+├── database/
+│   ├── connection.py
+│   ├── models.py
+│   └── repository.py
+├── scripts/
+│   └── init_db.py
 ├── voice/
 │   └── elevenlabs.py
 ├── app.py
@@ -69,4 +92,4 @@ JARVISFORME/
 └── requirements.txt
 ```
 
-API keys are loaded from `.env` and are intentionally excluded from Git.
+API keys and local runtime data are excluded from Git.
